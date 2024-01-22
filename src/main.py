@@ -19,11 +19,11 @@ KMSDependency = Annotated[KMSClient, Depends(get_kms)]
 
 app = FastAPI()
 
-@app.post("/generate-certification/")
-async def generate_certification(file: UploadFile):
+@app.post("/certify/")
+async def certify(file: UploadFile):
     contents = await file.read()
     print(contents)
-    return
+    return {"certified": True}
  
 
 @app.post("/verify/")
