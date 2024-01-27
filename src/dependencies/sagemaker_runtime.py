@@ -1,23 +1,27 @@
 import contextlib
+from functools import lru_cache
 from typing import Annotated, AsyncIterator
 
 import boto3
 from fastapi import Depends, FastAPI
 from mypy_boto3_sagemaker_runtime import SageMakerRuntimeClient
 
+from ..config import ConfigDependency
+
 client = None
 
 
 @contextlib.asynccontextmanager
 async def sagemaker_lifespan(app: FastAPI) -> AsyncIterator[None]:
-    global client
-    client = boto3.client("sagemaker-runtime")
     yield
-    client.close()
+    if client:
+        client.close()
 
 
-async def get_sagemaker():
+@lru_cache
+async def get_sagemaker(config: ConfigDependency):
     global client
+    client = boto3.client("sagemaker-runtime", region_name="us-east-1")
     return client
 
 

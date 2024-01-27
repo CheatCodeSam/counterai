@@ -11,6 +11,7 @@ class Config(BaseSettings):
 
     key_arn: str = Field(validation_alias="AWS_KMS_KEY_ARN")
     sagemaker_endpoint: str = Field(validation_alias="AWS_SAGEMAKER_ENDPOINT")
+    aws_region: str = Field(validation_alias="AWS_REGION")
 
 
 @lru_cache
