@@ -19,7 +19,7 @@ async def kms_lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 @lru_cache
-async def get_kms(config: ConfigDependency):
+def get_kms(config: ConfigDependency):
     global client
     client = boto3.client("kms", region_name=config.aws_region)
     return client

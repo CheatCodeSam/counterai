@@ -19,7 +19,7 @@ async def sagemaker_lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 @lru_cache
-async def get_sagemaker(config: ConfigDependency):
+def get_sagemaker(config: ConfigDependency):
     global client
     client = boto3.client("sagemaker-runtime", region_name="us-east-1")
     return client

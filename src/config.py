@@ -7,7 +7,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Config(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", frozen=True
+    )
 
     key_arn: str = Field(validation_alias="AWS_KMS_KEY_ARN")
     sagemaker_endpoint: str = Field(validation_alias="AWS_SAGEMAKER_ENDPOINT")
