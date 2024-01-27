@@ -1,6 +1,7 @@
 import base64
 import hashlib
 
+from botocore.exceptions import ClientError
 from fastapi import FastAPI, HTTPException, UploadFile
 
 from .config import ConfigDependency
@@ -22,7 +23,7 @@ async def certify(
     client_res = sagemaker.invoke_endpoint(
         EndpointName=config.sagemaker_endpoint, Body=contents
     )
-    sagemaker_res = client_res["Body"].read().decode()
+    sagemaker_res = client_res["Body"]
     if sagemaker_res == "HUMAN":
         sha256_hash = hashlib.sha256(contents).digest()
         certificate = kms.sign(
@@ -30,9 +31,10 @@ async def certify(
             Message=sha256_hash,
             SigningAlgorithm="RSASSA_PSS_SHA_256",
         )
-        return {"certified": True, "certificate": certificate}
+        base64_encoded_data = base64.b64encode(certificate["Signature"])
+        return {"certified": True, "certificate": base64_encoded_data}
     else:
-        return {"certified": False}
+        return {"certified": False, "certificate": base64_encoded_data}
 
 
 @app.post("/verify/")
@@ -45,14 +47,19 @@ async def verify(
         signature_bytes = base64.b64decode(signature)
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid signature format")
-    client_res = kms.verify(
-        KeyId=config.key_arn,
-        Message=sha256_hash,
-        MessageType="DIGEST",
-        Signature=signature_bytes,
-        SigningAlgorithm="RSASSA_PSS_SHA_256",
-    )
-    is_valid_signature = client_res["SignatureValid"]
+    is_valid_signature = False
+    try:
+        client_res = kms.verify(
+            KeyId=config.key_arn,
+            Message=sha256_hash,
+            # MessageType="DIGEST",
+            Signature=signature_bytes,
+            SigningAlgorithm="RSASSA_PSS_SHA_256",
+        )
+        is_valid_signature = client_res["SignatureValid"]
+    except ClientError as e:
+        if e.response["Error"]["Code"] == "KMSInvalidSignatureException":
+            is_valid_signature = False
     return {
         "filename": file.filename,
         "sha256": sha256_hash.hex(),
@@ -67,4 +74,5 @@ async def public_key(
 ):
     public_key_res = kms.get_public_key(KeyId=config.key_arn)
     public_key = public_key_res["PublicKey"]
-    return {"public_key": public_key}
+    public_key_base64 = base64.b64encode(public_key).decode()
+    return {"public_key": public_key_base64}
