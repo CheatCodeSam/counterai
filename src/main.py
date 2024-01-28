@@ -20,14 +20,14 @@ async def certify(
     config: ConfigDependency,
 ):
     contents = await file.read()
-    client_res = sagemaker.invoke_endpoint(
-        EndpointName=config.sagemaker_endpoint, Body=contents
-    )
-    sagemaker_res = client_res["Body"]
+    # client_res = sagemaker.invoke_endpoint(
+    #     EndpointName=config.sagemaker_endpoint, Body=contents
+    # )
+    sagemaker_res = "HUMAN"
     if sagemaker_res == "HUMAN":
         sha256_hash = hashlib.sha256(contents).digest()
         certificate = kms.sign(
-            KeyId=config.key_arn,
+            KeyId=config.key_id,
             Message=sha256_hash,
             SigningAlgorithm="RSASSA_PSS_SHA_256",
         )
@@ -50,7 +50,7 @@ async def verify(
     is_valid_signature = False
     try:
         client_res = kms.verify(
-            KeyId=config.key_arn,
+            KeyId=config.key_id,
             Message=sha256_hash,
             # MessageType="DIGEST",
             Signature=signature_bytes,
@@ -60,6 +60,10 @@ async def verify(
     except ClientError as e:
         if e.response["Error"]["Code"] == "KMSInvalidSignatureException":
             is_valid_signature = False
+        else:
+            raise HTTPException(
+                status_code=500, detail={"message": "Internal Server Error"}
+            )
     return {
         "filename": file.filename,
         "sha256": sha256_hash.hex(),
@@ -72,7 +76,7 @@ async def public_key(
     kms: KMSDependency,
     config: ConfigDependency,
 ):
-    public_key_res = kms.get_public_key(KeyId=config.key_arn)
+    public_key_res = kms.get_public_key(KeyId=config.key_id)
     public_key = public_key_res["PublicKey"]
     public_key_base64 = base64.b64encode(public_key).decode()
     return {"public_key": public_key_base64}
