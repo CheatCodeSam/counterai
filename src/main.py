@@ -34,7 +34,7 @@ async def certify(
         base64_encoded_data = base64.b64encode(certificate["Signature"])
         return {"certified": True, "certificate": base64_encoded_data}
     else:
-        return {"certified": False, "certificate": base64_encoded_data}
+        return {"certified": False, "certificate": None}
 
 
 @app.post("/verify/")
@@ -52,7 +52,6 @@ async def verify(
         client_res = kms.verify(
             KeyId=config.key_id,
             Message=sha256_hash,
-            # MessageType="DIGEST",
             Signature=signature_bytes,
             SigningAlgorithm="RSASSA_PSS_SHA_256",
         )
