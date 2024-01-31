@@ -1,8 +1,9 @@
 import base64
 import hashlib
+from typing import Annotated
 
 from botocore.exceptions import ClientError
-from fastapi import FastAPI, HTTPException, UploadFile
+from fastapi import FastAPI, Form, HTTPException, UploadFile
 
 from .config import ConfigDependency
 from .dependencies.kms import KMSDependency, kms_lifespan
@@ -39,7 +40,10 @@ async def certify(
 
 @app.post("/verify/")
 async def verify(
-    signature: str, file: UploadFile, kms: KMSDependency, config: ConfigDependency
+    signature: Annotated[str, Form()],
+    file: UploadFile,
+    kms: KMSDependency,
+    config: ConfigDependency,
 ):
     contents = await file.read()
     sha256_hash = hashlib.sha256(contents).digest()
