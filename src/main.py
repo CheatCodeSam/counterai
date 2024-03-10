@@ -1,9 +1,8 @@
 import base64
 import hashlib
-from typing import Annotated
 
 from botocore.exceptions import ClientError
-from fastapi import FastAPI, Form, HTTPException, UploadFile
+from fastapi import FastAPI, HTTPException, UploadFile
 from mangum import Mangum
 from pydantic import BaseModel, Field
 
