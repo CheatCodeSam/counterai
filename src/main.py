@@ -4,6 +4,7 @@ from typing import Annotated
 
 from botocore.exceptions import ClientError
 from fastapi import FastAPI, Form, HTTPException, UploadFile
+from mangum import Mangum
 
 from .config import ConfigDependency
 from .dependencies.kms import KMSDependency, kms_lifespan
@@ -83,3 +84,6 @@ async def public_key(
     public_key = public_key_res["PublicKey"]
     public_key_base64 = base64.b64encode(public_key).decode()
     return {"public_key": public_key_base64}
+
+
+handler = Mangum(app)

@@ -611,6 +611,20 @@ files = [
 ]
 
 [[package]]
+name = "mangum"
+version = "0.17.0"
+description = "AWS Lambda support for ASGI applications"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "mangum-0.17.0-py3-none-any.whl", hash = "sha256:f00be705605bc4793958df62e4d249abf58d254c39d90bb410d069570206f4a2"},
+    {file = "mangum-0.17.0.tar.gz", hash = "sha256:5b4e26375e12eed051687670466d17968f8b74beecaca432edd4eb4127f78509"},
+]
+
+[package.dependencies]
+typing-extensions = "*"
+
+[[package]]
 name = "mypy-boto3-kms"
 version = "1.34.14"
 description = "Type annotations for boto3.KMS 1.34.14 service generated with mypy-boto3-builder 7.23.0"
@@ -1274,4 +1288,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "71725690414cb9be3d70c67c9cea2c563854e5b28e7cd0ab1f055a28a081489a"
+content-hash = "5bdd7d3d7b70115cbc807012535d8fc789f53beca8c1731ae57115fb65ff7332"
