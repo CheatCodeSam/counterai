@@ -5,6 +5,7 @@ from typing import Annotated
 from botocore.exceptions import ClientError
 from fastapi import FastAPI, Form, HTTPException, UploadFile
 from mangum import Mangum
+from pydantic import BaseModel, Field
 
 from .config import ConfigDependency
 from .dependencies.kms import KMSDependency, kms_lifespan
@@ -39,19 +40,27 @@ async def certify(
         return {"certified": False, "certificate": None}
 
 
+class VerifyBody(BaseModel):
+    signature: str = Field(..., description="The digital signature.")
+    sha256_hash_hex: str = Field(
+        ..., description="The SHA256 hash of the file content."
+    )
+
+
 @app.post("/verify/")
 async def verify(
-    signature: Annotated[str, Form()],
-    file: UploadFile,
+    body: VerifyBody,
     kms: KMSDependency,
     config: ConfigDependency,
 ):
-    contents = await file.read()
-    sha256_hash = hashlib.sha256(contents).digest()
     try:
-        signature_bytes = base64.b64decode(signature)
+        signature_bytes = base64.b64decode(body.signature)
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid signature format")
+    try:
+        sha256_hash = bytes.fromhex(body.sha256_hash_hex)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid sha256 hash")
     is_valid_signature = False
     try:
         client_res = kms.verify(
@@ -69,8 +78,6 @@ async def verify(
                 status_code=500, detail={"message": "Internal Server Error"}
             )
     return {
-        "filename": file.filename,
-        "sha256": sha256_hash.hex(),
         "is_valid": is_valid_signature,
     }
 
