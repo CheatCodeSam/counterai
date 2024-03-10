@@ -41,10 +41,8 @@ async def certify(
 
 
 class VerifyBody(BaseModel):
-    signature: str = Field(..., description="The digital signature.")
-    sha256_hash_hex: str = Field(
-        ..., description="The SHA256 hash of the file content."
-    )
+    signature: str = Field(description="The digital signature.")
+    sha256_hash_hex: str = Field(description="The SHA256 hash of the file content.")
 
 
 @app.post("/verify/")
