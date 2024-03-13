@@ -22,9 +22,7 @@ async def certify(
     config: ConfigDependency,
 ):
     contents = await file.read()
-    # client_res = sagemaker.invoke_endpoint(
-    #     EndpointName=config.sagemaker_endpoint, Body=contents
-    # )
+    # client_res = sagemaker.invoke_endpoint(EndpointName=config.sagemaker_endpoint, Body=contents)  # noqa: ERA001
     sagemaker_res = "HUMAN"
     if sagemaker_res == "HUMAN":
         sha256_hash = hashlib.sha256(contents).digest()
@@ -73,7 +71,7 @@ async def verify(
         else:
             raise HTTPException(
                 status_code=500, detail={"message": "Internal Server Error"}
-            )
+            ) 
     return {
         "is_valid": is_valid_signature,
     }

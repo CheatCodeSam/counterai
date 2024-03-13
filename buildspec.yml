@@ -8,9 +8,13 @@ phases:
             - python -m pip install --upgrade pip
             - python -m pip install pipx
             - python3 -m pipx ensurepath
-            - pipx install poetry
+            - pipx install poetry ruff
             - poetry config virtualenvs.in-project true
-            - poetry install --only main
+            - poetry install --without dev
+    pre-build:
+        commands:
+            - ruff format --check
+            - ruff check
     build:
         commands:
             - mkdir -p dist/lambda-package
