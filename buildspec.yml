@@ -11,7 +11,7 @@ phases:
             - pipx install poetry ruff
             - poetry config virtualenvs.in-project true
             - poetry install --without dev
-    pre-build:
+    pre_build:
         commands:
             - ruff format --check
             - ruff check
