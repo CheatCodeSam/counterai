@@ -71,7 +71,7 @@ async def verify(
         else:
             raise HTTPException(
                 status_code=500, detail={"message": "Internal Server Error"}
-            ) 
+            )
     return {
         "is_valid": is_valid_signature,
     }
