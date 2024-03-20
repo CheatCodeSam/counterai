@@ -20,7 +20,7 @@ phases:
             - mkdir -p dist/lambda-package
             - cp --recursive .venv/lib/python*/site-packages/* dist/lambda-package/
             - cp --recursive src dist/lambda-package/
-            - zip -r ./dist/lambda-package.zip ./dist/lambda-package
+            - (cd dist/lambda-package; zip -r ../lambda-package-4.zip *)
 
 artifacts:
   files:
